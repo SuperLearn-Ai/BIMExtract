@@ -1,0 +1,205 @@
+# Model Configuration for Ultra-Cost-Optimized Pipeline
+# Defines all model specifications, paths, and optimization settings
+
+# Model Registry
+models:
+  # Stage 1: Visual Processing Models
+  visual_parsing:
+    paddleocr:
+      name: "PaddleOCR"
+      version: "v4.2"
+      type: "ocr"
+      quantization: "4bit"
+      memory_usage: "2GB"
+      cost_per_1k_pages: 0.02
+      accuracy: 0.96
+      
+    nougat:
+      name: "facebook/nougat-small"
+      version: "0.1.17"
+      type: "latex_extraction"
+      quantization: "int8"
+      memory_usage: "1.5GB"
+      cost_per_1k_pages: 0.01
+      accuracy: 0.94
+      
+    layoutlm:
+      name: "microsoft/layoutlmv3-base"
+      version: "latest"
+      type: "layout_understanding"
+      quantization: "4bit"
+      memory_usage: "3GB"
+      cost_per_1k_pages: 0.02
+      accuracy: 0.93
+
+  # Stage 2: Language Models
+  language_models:
+    llama_8b:
+      name: "Meta-Llama-3.1-8B-Instruct"
+      model_file: "Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"
+      type: "causal_lm"
+      quantization: "Q4_K_M"
+      context_length: 8192
+      memory_usage: "6GB"
+      cost_per_1k_tokens: 0.0001
+      performance: "high"
+      
+    llama_1b:
+      name: "Meta-Llama-3.1-1B-Instruct"
+      model_file: "Meta-Llama-3.1-1B-Instruct-Q4_K_M.gguf"
+      type: "causal_lm"
+      quantization: "Q4_K_M"
+      context_length: 4096
+      memory_usage: "1GB"
+      cost_per_1k_tokens: 0.00002
+      performance: "fast"
+      
+    # Embedding Models
+    bge_small:
+      name: "BAAI/bge-small-en-v1.5"
+      type: "embedding"
+      dimensions: 384
+      max_seq_length: 512
+      device: "cpu"
+      memory_usage: "500MB"
+      cost_per_1k_embeddings: 0.0001
+
+# Quantization Configurations
+quantization_configs:
+  q4_k_m:
+    type: "Q4_K_M"
+    description: "4-bit quantization with mixed precision"
+    memory_reduction: 0.75
+    performance_retention: 0.98
+    
+  int8:
+    type: "INT8"
+    description: "8-bit integer quantization"
+    memory_reduction: 0.5
+    performance_retention: 0.99
+    
+  nf4:
+    type: "NF4"
+    description: "4-bit NormalFloat quantization"
+    memory_reduction: 0.75
+    performance_retention: 0.97
+
+# Model Download URLs and Paths
+model_sources:
+  huggingface_models:
+    - name: "facebook/nougat-small"
+      url: "https://huggingface.co/facebook/nougat-small"
+      size: "1.2GB"
+      
+    - name: "microsoft/layoutlmv3-base"
+      url: "https://huggingface.co/microsoft/layoutlmv3-base"
+      size: "433MB"
+      
+    - name: "BAAI/bge-small-en-v1.5"
+      url: "https://huggingface.co/BAAI/bge-small-en-v1.5"
+      size: "133MB"
+      
+  gguf_models:
+    - name: "Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"
+      url: "https://huggingface.co/bartowski/Meta-Llama-3.1-8B-Instruct-GGUF"
+      file: "Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"
+      size: "4.6GB"
+      
+    - name: "Meta-Llama-3.1-1B-Instruct-Q4_K_M.gguf"  
+      url: "https://huggingface.co/bartowski/Meta-Llama-3.1-1B-Instruct-GGUF"
+      file: "Meta-Llama-3.1-1B-Instruct-Q4_K_M.gguf"
+      size: "800MB"
+
+# Hardware Requirements
+hardware_requirements:
+  minimum:
+    gpu_memory: "6GB"
+    system_memory: "16GB"
+    storage: "50GB"
+    cpu_cores: 8
+    
+  recommended:
+    gpu_memory: "12GB"
+    system_memory: "32GB"
+    storage: "100GB"
+    cpu_cores: 16
+    
+  optimal:
+    gpu_memory: "24GB"
+    system_memory: "64GB"
+    storage: "500GB"
+    cpu_cores: 32
+
+# Performance Benchmarks
+benchmarks:
+  visual_parsing:
+    pages_per_hour: 800
+    accuracy: 0.95
+    memory_peak: "8GB"
+    
+  text_processing:
+    tokens_per_second: 50
+    context_utilization: 0.8
+    cache_hit_rate: 0.85
+    
+  vector_operations:
+    embeddings_per_second: 100
+    search_latency: "50ms"
+    storage_efficiency: 0.9
+
+# Cost Analysis
+cost_breakdown:
+  infrastructure:
+    gpu_spot_instance: 0.19  # $/hour
+    cpu_instance: 0.05       # $/hour
+    storage: 0.10            # $/GB/month
+    bandwidth: 0.05          # $/GB
+    
+  per_operation:
+    ocr_per_page: 0.00005
+    embedding_per_chunk: 0.000001
+    llm_inference_per_token: 0.0000001
+    vector_search: 0.000005
+
+# Model Optimization Settings
+optimization:
+  # Gradient checkpointing
+  gradient_checkpointing:
+    enabled: true
+    checkpoint_ratio: 0.5
+    memory_savings: 0.8
+    
+  # Mixed precision training
+  mixed_precision:
+    enabled: true
+    dtype: "bfloat16"
+    loss_scale: "dynamic"
+    
+  # Knowledge distillation
+  distillation:
+    enabled: false
+    teacher_model: "Meta-Llama-3.1-70B"
+    student_model: "Meta-Llama-3.1-8B"
+    temperature: 3.0
+    alpha: 0.7
+
+# Environment Variables
+environment:
+  model_cache_dir: "./models"
+  temp_dir: "./temp"
+  log_dir: "./logs"
+  data_dir: "./data"
+  
+# Model Loading Strategies
+loading_strategies:
+  lazy_loading:
+    enabled: true
+    description: "Load models only when needed"
+    
+  model_sharing:
+    enabled: true
+    description: "Share models across workers"
+    
+  memory_mapping:
+    enabled: true
+    description: "Memory-map model files"

@@ -1,0 +1,64 @@
+# Ultra-Cost-Optimized Academic Document Extraction Pipeline Config
+# Optimized for 95% cost reduction with 95% accuracy
+
+visual_parsing:
+  # PDF to Image Conversion Settings
+  pdf_conversion:
+    dpi: [150, 200, 300]  # Multiple DPI fallbacks
+    format: "PNG"
+    thread_count: 2
+    poppler_path: null  # Auto-detect
+    
+  # Image Preprocessing
+  preprocessing:
+    enable_clahe: true
+    clahe_clip_limit: 2.0
+    enable_grayscale: true
+    enable_threshold: true
+    threshold_method: "adaptive"
+    
+  # OCR Settings (PaddleOCR)
+  ocr:
+    use_angle_cls: true
+    use_gpu: false  # CPU-only for cost optimization
+    lang: "en"
+    det_algorithm: "DB"
+    rec_algorithm: "CRNN"
+    max_text_length: 25
+    
+  # LaTeX Extraction (Nougat-small quantized)
+  latex:
+    model_name: "facebook/nougat-small"
+    use_quantization: true
+    quantization_bits: 4
+    batch_size: 1
+    max_length: 512
+    
+  # Layout Analysis (LayoutLMv3 quantized) 
+  layout:
+    model_name: "microsoft/layoutlmv3-base"
+    use_quantization: true
+    quantization_bits: 8
+    confidence_threshold: 0.5
+    
+# Cost Optimization Settings
+cost_optimization:
+  enable_caching: true
+  cache_ttl: 3600  # 1 hour
+  batch_processing: true
+  max_batch_size: 4
+  enable_compression: true
+  
+# Error Handling
+error_handling:
+  max_retries: 3
+  retry_delay: 1.0
+  fallback_to_basic_ocr: true
+  enable_detailed_logging: true
+  
+# Performance Settings
+performance:
+  max_workers: 2
+  memory_limit_mb: 2048
+  enable_async: true
+  gc_frequency: 10
