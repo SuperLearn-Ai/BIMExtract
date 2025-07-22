@@ -1,0 +1,246 @@
+# Stage 2: Qwen3-30B-A3B Optimized Chunking Configuration
+# Target: $0.012 per 1K pages with 96-99% accuracy
+
+stage2_qwen3:
+  # Model Configuration
+  model:
+    name: "Qwen/Qwen3-30B-A3B"
+    qwen3_model_path: "Qwen/Qwen3-30B-A3B"
+    qwen3_tokenizer_path: "Qwen/Qwen3-30B-A3B"
+    device: "cuda" # Use GPU if available
+
+    # Quantization settings for memory efficiency
+    quantization:
+      enabled: true
+      load_in_4bit: true
+      bnb_4bit_compute_dtype: "float16"
+      bnb_4bit_use_double_quant: true
+      bnb_4bit_quant_type: "nf4"
+
+    # Generation parameters (following Qwen3 best practices)
+    generation:
+      thinking_mode:
+        temperature: 0.6
+        top_p: 0.95
+        top_k: 20
+        min_p: 0.0
+        do_sample: true
+        max_new_tokens: 2048
+        enable_thinking: true
+
+      non_thinking_mode:
+        temperature: 0.7
+        top_p: 0.8
+        top_k: 20
+        min_p: 0.0
+        do_sample: true
+        max_new_tokens: 1024
+        enable_thinking: false
+
+  # Chunking Configuration
+  chunking:
+    base_chunk_size: 1024
+    overlap: 128
+    min_chunk_size: 256
+    max_chunk_size: 2048
+
+    # Complexity-based processing
+    enable_thinking_for_medium: true
+    enable_thinking_for_complex: true
+
+    # Semantic boundaries for better chunking
+    semantic_boundaries:
+      - '\n\n+' # Paragraph breaks
+      - '\n[A-Z][a-z]+:' # Section headers
+      - '\n\d+\.' # Numbered lists
+      - '\n[•\-\*]' # Bullet points
+      - '\.\s+[A-Z]' # Sentence boundaries
+      - '\\section' # LaTeX sections
+      - '\\subsection' # LaTeX subsections
+
+  # Complexity Analysis
+  complexity:
+    # Thresholds for complexity classification
+    simple_threshold: 0.3
+    complex_threshold: 0.7
+
+    # Patterns and weights
+    formula_weight: 0.1
+    table_weight: 0.05
+    citation_weight: 0.02
+    technical_term_weight: 0.03
+    latex_formula_weight: 0.05
+    table_count_weight: 0.1
+    length_weight_max: 0.2
+
+    # Technical terms indicating complexity
+    technical_terms:
+      - "theorem"
+      - "lemma"
+      - "proof"
+      - "algorithm"
+      - "equation"
+      - "hypothesis"
+      - "methodology"
+      - "regression"
+      - "correlation"
+      - "statistical"
+
+  # Embeddings Configuration
+  embeddings:
+    model_name: "sentence-transformers/all-MiniLM-L6-v2"
+    device: "cpu" # Keep on CPU for memory efficiency
+    batch_size: 32
+    normalize_embeddings: true
+
+  # Caching Configuration (Redis)
+  cache:
+    enabled: true
+    redis_host: "localhost"
+    redis_port: 6379
+    redis_db: 0
+    default_ttl: 86400 # 24 hours
+
+    # Cache compression
+    enable_compression: true
+    compression_level: 6
+
+    # Memory fallback when Redis unavailable
+    memory_cache_size: 1000
+
+    # TTL by complexity (seconds)
+    ttl_by_complexity:
+      simple: 172800 # 48 hours (more stable)
+      medium: 86400 # 24 hours
+      complex: 43200 # 12 hours (more dynamic)
+
+  # Cost Optimization
+  cost:
+    # Target costs ($ per 1K tokens)
+    cost_per_1k_tokens: 0.012
+
+    # Complexity-based cost multipliers
+    cost_multipliers:
+      simple: 0.8 # 20% discount for non-thinking
+      medium: 1.0 # Standard rate
+      complex: 1.2 # 20% premium for thinking mode
+
+    # Performance targets
+    target_cache_hit_rate: 0.90
+    target_processing_time: 2.0 # seconds per document
+
+    # Cost tracking
+    enable_detailed_tracking: true
+    cost_alert_threshold: 0.02 # Alert if cost > $0.02 per doc
+
+  # Performance Configuration
+  performance:
+    # Concurrent processing
+    max_workers: 2
+    enable_async: true
+
+    # Memory management
+    memory_limit_mb: 4096
+    enable_gc_after_processing: true
+    gc_frequency: 5 # Every 5 documents
+
+    # Timeout settings
+    chunk_timeout: 30 # seconds per chunk operation
+    total_timeout: 300 # seconds per document
+
+    # Batch processing
+    enable_batch_processing: true
+    batch_size: 4
+
+  # LangChain Configuration
+  langchain:
+    # Chain settings
+    enable_memory: true
+    memory_type: "buffer"
+    memory_size: 10
+
+    # Prompt optimization
+    enable_prompt_caching: true
+    prompt_cache_size: 100
+
+    # Callback configuration
+    enable_callbacks: true
+    callback_verbosity: 1
+
+  # Monitoring and Logging
+  monitoring:
+    enable_agentops: false # Set to true if you have AgentOps key
+    agentops_key: "your_key_here"
+
+    # Metrics collection
+    collect_performance_metrics: true
+    metrics_export_interval: 300 # 5 minutes
+
+    # Logging
+    log_level: "INFO"
+    log_file: "stage2_qwen3.log"
+    enable_detailed_logging: true
+    log_chunk_samples: true
+    max_sample_length: 200
+
+  # Validation and Quality
+  validation:
+    enable_chunk_validation: true
+    min_chunk_quality_score: 0.8
+
+    # Chunk quality checks
+    checks:
+      min_length: true
+      max_length: true
+      semantic_coherence: true
+      overlap_validation: true
+
+    # Fallback configuration
+    enable_fallback: true
+    fallback_method: "recursive_character"
+    fallback_chunk_size: 1000
+    fallback_overlap: 100
+
+# Integration with other stages
+integration:
+  # Input validation (from Stage 1)
+  validate_stage1_input: true
+  required_fields:
+    - "text_content"
+    - "confidence_scores"
+
+  # Output format (for Stage 3)
+  output_format:
+    include_embeddings: true
+    embedding_precision: "float32"
+    metadata_fields:
+      - "complexity"
+      - "model_used"
+      - "thinking_used"
+      - "confidence_score"
+
+  # Error handling
+  error_handling:
+    max_retries: 3
+    retry_delay: 1.0
+    fallback_on_error: true
+
+# Testing Configuration
+testing:
+  # Test documents
+  sample_documents:
+    - "documents/sample.pdf"
+    - "documents/sample2.pdf"
+    - "documents/sample3.pdf"
+
+  # Test parameters
+  run_benchmarks: true
+  benchmark_iterations: 5
+  validate_accuracy: true
+
+  # Expected performance thresholds
+  thresholds:
+    max_cost_per_1k_pages: 0.015
+    min_cache_hit_rate: 0.85
+    max_processing_time: 5.0
+    min_chunk_quality: 0.9

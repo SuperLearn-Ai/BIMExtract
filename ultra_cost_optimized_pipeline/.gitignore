@@ -1,0 +1,61 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Log files
+*.log
+pipeline.log
+pipeline_run.log
+stage2_qwen3.log
+
+# Environment files
+.env
+.venv
+venv/
+env/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Model cache
+.cache/
+models/
+*.bin
+*.safetensors
+
+# Redis dump
+dump.rdb
+
+# Temporary files
+*.tmp
+temp/
+tmp/
+
+# Documents (add your own PDFs as needed)
+documents/*.pdf
+!documents/sample*.pdf  # Keep sample files if you want them tracked 
