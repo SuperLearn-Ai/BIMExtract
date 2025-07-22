@@ -48,7 +48,7 @@ chmod +x runpod_setup.sh
 ### Step 2: Deploy to RunPod
 ```bash
 # Run the automated deployment script
-bash runpod_setup.sh
+./runpod_setup.sh
 ```
 
 The script will:
