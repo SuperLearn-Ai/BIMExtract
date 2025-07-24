@@ -1,0 +1,25 @@
+endpoints:
+  combined_service: "https://jeqrwyd0hbl40c-8000.proxy.runpod.net"
+  
+api_key: "${RUNPOD_API_KEY}"
+
+# Service configuration
+services:
+  qwen3_llm:
+    endpoint: "combined_service"
+    service_type: "qwen3_llm"
+    thinking_mode: true
+    max_tokens: 8192
+    temperature: 0.1
+    
+  visual_parsing:
+    endpoint: "combined_service" 
+    service_type: "visual_parsing"
+    ocr_lang: "en"
+    parse_types: ["ocr", "nougat", "layoutlm"]
+
+# Cost tracking
+cost_optimization:
+  target_cost_per_1k_pages: 0.15
+  gpu_cost_per_hour: 0.16  # RTX A5000 on-demand
+  expected_processing_time: 45  # seconds per document 
