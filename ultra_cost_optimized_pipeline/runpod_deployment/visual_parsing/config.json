@@ -1,0 +1,11 @@
+{
+  "name": "ultra-pipeline-visual",
+  "gpu_type": "NVIDIA RTX A5000",
+  "container_disk_gb": 40,
+  "env_vars": {
+    "VISUAL_MODE": "multi",
+    "OCR_LANG": "en",
+    "NOUGAT_MODEL": "0.1.0-base",
+    "LAYOUTLM_MODEL": "microsoft/layoutlm-base-uncased"
+  }
+}

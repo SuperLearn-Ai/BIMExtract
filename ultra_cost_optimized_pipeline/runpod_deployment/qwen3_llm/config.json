@@ -1,0 +1,12 @@
+{
+  "name": "ultra-pipeline-qwen3",
+  "gpu_type": "NVIDIA RTX A5000",
+  "container_disk_gb": 60,
+  "env_vars": {
+    "MODEL_NAME": "Qwen/Qwen2.5-Coder-32B-Instruct",
+    "QUANTIZATION": "A3B",
+    "THINKING_MODE": "enabled",
+    "MAX_TOKENS": "8192",
+    "TEMPERATURE": "0.1"
+  }
+}
