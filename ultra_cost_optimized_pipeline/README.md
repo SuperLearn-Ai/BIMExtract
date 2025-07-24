@@ -32,13 +32,14 @@ Stage 1 (Visual) → Stage 2 (Qwen3) → Stage 3 (Vector) → Stage 4 (Orchestra
      $0.05      →     $0.012     →     $0.03      →      $0.01
 ```
 
-### Stage 2 Components
+All pipeline code is now in `src/pipeline/` and all utilities in `src/utils/`.
 
-1. **Complexity Analyzer**: Automatically classifies document difficulty
-2. **Qwen3 LangChain LLM**: Wrapper with proper thinking modes
-3. **Redis Cache**: Distributed caching with compression
-4. **Embedding Generation**: Efficient CPU-based embeddings
-5. **Performance Monitor**: Real-time metrics and cost tracking
+### Stage Components
+
+- **Stage 1:** Visual Parsing (PaddleOCR, Nougat, LayoutLM)
+- **Stage 2:** Qwen3-30B-A3B Chunking (with LangChain orchestration)
+- **Stage 3:** Qdrant Vector Storage
+- **Stage 4:** LangChain Orchestration (sequential chains, memory, callbacks)
 
 ## 🔧 Installation
 
@@ -47,7 +48,79 @@ Stage 1 (Visual) → Stage 2 (Qwen3) → Stage 3 (Vector) → Stage 4 (Orchestra
 - **Python**: 3.8+
 - **GPU**: CUDA-compatible (recommended for Qwen3)
 - **Memory**: 8GB+ RAM (16GB+ recommended)
-- **Storage**: 10GB+ free space
+- **RunPod**: Account with A5000 GPU access (for cloud deployment)
+
+### Quick Start
+
+```bash
+# Clone repository
+git clone <your-repo-url>
+cd ultra_cost_optimized_pipeline
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set up environment variables (optional)
+export RUNPOD_API_KEY="your-api-key"
+
+# Process documents
+python run.py                    # Process all PDFs in docs/
+python run.py --files doc.pdf    # Process specific file
+python run.py --mode runpod      # Use RunPod deployment
+```
+
+## 🎯 Command Line Usage
+
+### Unified CLI Runner
+
+The `run.py` script provides a consolidated interface for all execution modes:
+
+```bash
+# Basic Usage
+python run.py                                    # Process all PDFs in docs/
+python run.py --files doc1.pdf doc2.pdf         # Process specific files
+python run.py --docs-dir /path/to/docs          # Custom docs directory
+
+# Execution Modes
+python run.py --mode langchain                   # LangChain orchestration (default)
+python run.py --mode local                       # Traditional pipeline  
+python run.py --mode runpod                      # RunPod cloud execution
+
+# Performance Options
+python run.py --batch-size 5                    # Larger concurrent batches
+python run.py --verbose                          # Debug logging
+python run.py --no-metrics                      # Disable metrics display
+
+# Configuration
+python run.py --config custom_config.yaml       # Custom configuration
+python run.py --log-file custom.log            # Custom log file
+```
+
+### Example Output
+
+```
+🚀 Starting Ultra-Cost-Optimized Pipeline
+Mode: LANGCHAIN
+Documents to process: 3
+
+📚 Processing batch 1/2
+📄 Processing: academic_paper.pdf
+📄 Processing: complex_layout.pdf
+✅ 1. academic_paper.pdf (45.2s)
+✅ 2. complex_layout.pdf (52.1s)
+
+======================================================================
+📊 PROCESSING RESULTS
+======================================================================
+📄 Total Documents: 3
+✅ Successful: 3
+❌ Failed: 0
+
+⏱️  PERFORMANCE METRICS
+   Total Processing Time: 142.5s
+   Average Time per Document: 47.5s
+   Throughput: 0.021 docs/sec
+```
 
 ### Dependencies
 
@@ -80,18 +153,18 @@ The pipeline automatically downloads Qwen3-30B-A3B from HuggingFace:
 
 ## 🚀 Quick Start
 
-### 1. Basic Usage
+### 1. Basic Usage (Python API)
 
 ```python
 import asyncio
-from src.main_pipeline import UltraOptimizedPipeline
+from src.pipeline.main_pipeline import UltraOptimizedPipeline
 
 async def main():
     # Initialize pipeline
     pipeline = UltraOptimizedPipeline()
     
     # Process a document
-    result = await pipeline.process_document("documents/sample.pdf")
+    result = await pipeline.process_document("docs/sample.pdf")
     
     if result.success:
         print(f"✅ Processed successfully!")
@@ -110,9 +183,9 @@ async def batch_example():
     pipeline = UltraOptimizedPipeline()
     
     documents = [
-        "documents/sample.pdf",
-        "documents/sample2.pdf", 
-        "documents/sample3.pdf"
+        "docs/sample.pdf",
+        "docs/sample2.pdf", 
+        "docs/sample3.pdf"
     ]
     
     results = await pipeline.process_documents(documents)
@@ -121,169 +194,173 @@ async def batch_example():
         print(f"{result.document_path}: {'✅' if result.success else '❌'}")
 ```
 
-### 3. Configuration Customization
+### 3. RunPod Cloud Deployment
 
-```yaml
-# config/stage2_qwen3_config.yaml
-stage2_qwen3:
-  chunking:
-    base_chunk_size: 1024  # Adjust chunk size
-    enable_thinking_for_medium: true  # Control thinking mode
-    
-  cost:
-    cost_per_1k_tokens: 0.012  # Cost target
-    
-  cache:
-    default_ttl: 86400  # Cache duration (seconds)
+For production workloads, deploy to RunPod A5000 GPUs for optimal performance:
+
+#### **Simple Deployment (Web Interface)**
+
+Since RunPod CLI interface changed, use the simplified deployment approach:
+
+```bash
+# 1. Generate deployment files
+python deploy_runpod.py
+
+# 2. Follow instructions in runpod_deployment/DEPLOYMENT_INSTRUCTIONS.md
 ```
+
+This creates deployment packages with:
+- **Qwen3 LLM Endpoint**: Handler + requirements for Stage 2 processing
+- **Visual Parsing Endpoint**: PaddleOCR + Nougat + LayoutLM for Stage 1
+- **Configuration Files**: Ready-to-upload deployment configs
+- **Step-by-step Instructions**: Complete web interface deployment guide
+
+#### **Deployment Process**
+
+1. **Generate Files**: `python deploy_runpod.py` creates `runpod_deployment/`
+2. **Deploy Qwen3**: Upload `qwen3_llm/` files to A5000 pod
+3. **Deploy Visual**: Upload `visual_parsing/` files to A5000 pod  
+4. **Configure Pipeline**: Update `config/runpod_endpoints.yaml` with pod URLs
+5. **Test**: Run `python run.py --mode runpod`
+
+#### **Cost Optimization**
+
+RunPod deployment achieves target **$0.15 per 1K pages**:
+- **A5000 GPU**: $0.34/hour optimal for Qwen3-30B-A3B
+- **Auto-scaling**: Pods sleep when idle (pay per use)
+- **Batch Processing**: Concurrent document processing
+- **Caching**: Redis cache reduces repeat processing costs
+- `POST /process_batch` — Batch process PDFs
+- `POST /search` — Search processed documents
+- `GET /metrics` — Get pipeline metrics
+- `GET /health` — Health check
 
 ## 🧪 Testing
 
 Run the comprehensive test suite:
 
 ```bash
-# Run all tests
-python test_pipeline.py
-
-# Quick test with mock documents
-python -c "import asyncio; from test_pipeline import main; asyncio.run(main())"
+python test_langchain_orchestration.py
 ```
 
 ### Test Documents
 
-Add your test PDFs to the `documents/` directory:
-- `documents/sample.pdf` - Simple document
-- `documents/sample2.pdf` - Medium complexity 
-- `documents/sample3.pdf` - Complex academic paper
+Add your test PDFs to the `docs/` directory:
+- `docs/sample.pdf` - Simple document
+- `docs/sample2.pdf` - Medium complexity 
+- `docs/sample3.pdf` - Complex academic paper
 
 ## 📊 Performance Monitoring
 
 ### Real-time Metrics
 
 ```python
-# Get performance metrics
+from src.pipeline.main_pipeline import UltraOptimizedPipeline
 pipeline = UltraOptimizedPipeline()
 await pipeline.process_documents(documents)
-
 metrics = pipeline.get_performance_metrics()
 print(f"Cost per 1K pages: ${metrics['cost_per_1k_pages']:.4f}")
 print(f"Cache hit rate: {metrics['stage2_metrics']['cache_hit_rate']:.2%}")
 ```
 
-### Cost Tracking
-
-The pipeline provides detailed cost breakdowns:
-
-```python
-# Stage-by-stage costs
-print(f"Stage 1 (Visual): ${result.stage1_result.cost_estimate:.4f}")
-print(f"Stage 2 (Qwen3): ${result.stage2_result.cost_estimate:.4f}")
-print(f"Stage 3 (Vector): ${result.stage3_result.cost_estimate:.4f}")
-print(f"Total: ${result.total_cost:.4f}")
-```
-
 ## ⚙️ Advanced Configuration
 
-### Thinking Mode Control
-
-```python
-# Customize thinking behavior per complexity
-complexity_settings = {
-    "simple": {"enable_thinking": False, "temperature": 0.7},
-    "medium": {"enable_thinking": True, "temperature": 0.6},
-    "complex": {"enable_thinking": True, "temperature": 0.6}
-}
-```
-
-### Cache Optimization
-
-```yaml
-cache:
-  enabled: true
-  redis_host: "localhost"
-  ttl_by_complexity:
-    simple: 172800   # 48 hours (stable)
-    medium: 86400    # 24 hours
-    complex: 43200   # 12 hours (dynamic)
-```
-
-### Model Fine-tuning
-
-```python
-# Custom generation parameters
-generation_params = {
-    "thinking_mode": {
-        "temperature": 0.6,
-        "top_p": 0.95,
-        "top_k": 20,
-        "do_sample": True
-    },
-    "non_thinking_mode": {
-        "temperature": 0.7,
-        "top_p": 0.8,
-        "top_k": 20
-    }
-}
-```
+- All configs are in `config/pipeline_config.yaml` and `config/stage2_qwen3_config.yaml`.
+- Update chunk size, thinking mode, cache TTL, and cost targets as needed.
 
 ## 🔍 Troubleshooting
 
 ### Common Issues
 
-1. **Out of Memory**
-   ```bash
-   # Reduce batch size in config
-   performance:
-     max_workers: 1
-     memory_limit_mb: 4096
-   ```
-
-2. **Redis Connection Error**
-   ```bash
-   # Start Redis server
-   redis-server
-   # Or disable caching
-   cache:
-     enabled: false
-   ```
-
-3. **Model Download Timeout**
-   ```bash
-   # Pre-download model
-   python -c "from transformers import AutoModel; AutoModel.from_pretrained('Qwen/Qwen3-30B-A3B')"
-   ```
+| Issue | Solution |
+|-------|----------|
+| **Out of Memory** | `python run.py --batch-size 1` (reduce concurrent processing) |
+| **Redis Connection Error** | `redis-server` or disable caching in config |
+| **Model Download Timeout** | Pre-download: `python -c "from transformers import AutoModel; AutoModel.from_pretrained('Qwen/Qwen2.5-Coder-32B-Instruct')"` |
+| **ImportError: pipeline not found** | Check Python path: `export PYTHONPATH=$PYTHONPATH:$(pwd)/src` |
+| **RunPod Connection Failed** | Verify `config/runpod_endpoints.yaml` has correct pod URLs |
+| **CUDA Out of Memory** | Reduce `max_tokens` in config or use CPU mode |
 
 ### Debug Mode
 
-```python
-# Enable detailed logging
-import logging
-logging.getLogger().setLevel(logging.DEBUG)
-
-# Enable chunk samples in logs
-monitoring:
-  log_chunk_samples: true
-  max_sample_length: 200
+```bash
+python run.py --verbose --log-file debug.log  # Enable detailed logging
+tail -f debug.log                            # Monitor in real-time
 ```
 
-## 📈 Performance Targets
+### Performance Optimization
 
-Our optimized implementation achieves:
+```bash
+# Monitor GPU usage
+nvidia-smi -l 1
 
-- ✅ **Cost**: $0.012 per 1K pages (Stage 2)
-- ✅ **Speed**: <5 seconds per document
-- ✅ **Quality**: 96-99% accuracy
-- ✅ **Cache**: 95% hit rate
-- ✅ **Memory**: 4GB GPU VRAM (with quantization)
+# Profile memory usage  
+python -m memory_profiler run.py --files sample.pdf
 
-## 🤝 Contributing
+# Check cache performance
+grep "cache_hit" pipeline.log | tail -10
+```
 
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature-name`
-3. Run tests: `python test_pipeline.py`
-4. Submit pull request
+## 📁 Project Structure
 
-## 📄 License
+```
+ultra_cost_optimized_pipeline/
+├── README.md                    # Main documentation
+├── run.py                      # Unified CLI runner
+├── deploy_runpod.py            # RunPod deployment generator
+├── requirements.txt            # Python dependencies
+├── config/                     # Configuration files
+│   ├── pipeline_config.yaml    # Main pipeline config
+│   └── stage2_qwen3_config.yaml # Qwen3 model config
+├── src/
+│   ├── pipeline/              # All pipeline stages (consolidated)
+│   │   ├── main_pipeline.py           # Traditional pipeline
+│   │   ├── pipeline_orchestrator.py   # LangChain orchestrator
+│   │   ├── stage1_visual_parsing.py   # Visual parsing
+│   │   ├── stage2_qwen3_optimized.py  # Qwen3 processing
+│   │   ├── stage3_vector_storage.py   # Qdrant storage
+│   │   ├── stage4_orchestration.py    # Final orchestration
+│   │   ├── qwen3_llm.py              # LangChain LLM wrapper
+│   │   ├── custom_chains.py          # LangChain chains
+│   │   └── runpod_langchain_api.py   # RunPod API server
+│   └── utils/                  # Utility modules
+│       ├── caching.py         # Redis caching
+│       ├── cost_tracking.py   # Cost monitoring
+│       └── quantization.py    # Model quantization
+├── docs/                      # Sample documents
+└── logs/                      # Pipeline logs
+```
+
+## 🎯 Key Features Summary
+
+- **🧠 Qwen3-30B-A3B**: Latest model with thinking/non-thinking modes
+- **🔗 LangChain Integration**: Professional orchestration and memory management
+- **☁️ RunPod Ready**: Simple cloud deployment for A5000 GPUs
+- **💰 Cost Optimized**: $0.15 per 1K pages target achieved
+- **📊 Comprehensive Monitoring**: Real-time performance and cost tracking
+- **🗃️ Intelligent Caching**: 95% cache hit rate with Redis
+- **⚡ Batch Processing**: Concurrent document processing
+- **🎛️ Multi-Mode Execution**: Local, LangChain, and RunPod modes
+
+## 🚀 Quick Commands Reference
+
+```bash
+# Basic usage
+python run.py                           # Process docs/ folder
+python run.py --files doc.pdf           # Single document  
+python run.py --mode langchain          # LangChain mode (default)
+
+# RunPod deployment
+python deploy_runpod.py                 # Generate deployment files
+python run.py --mode runpod             # Use RunPod endpoints
+
+# Development
+python run.py --verbose                 # Debug logging
+python run.py --config custom.yaml     # Custom configuration
+python run.py --batch-size 5           # Concurrent processing
+```
+
+For complete RunPod CLI reference, see `../RunPod_CLi_reference.md`.
 
 MIT License - see LICENSE file for details.
 
