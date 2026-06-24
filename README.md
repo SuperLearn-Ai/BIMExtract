@@ -1,6 +1,6 @@
 # BIMExtract: Intelligent Preprocessing Moat
 
-![Preprocessing Engine](../assets/preprocessing_moat.png)
+![Preprocessing Engine](assets/preprocessing_moat.png)
 
 ## The Breakthrough
 Traditional document parsing fails catastrophically when faced with messy layouts, handwritten notes, mathematical formulas, and unstructured noise. This failure propagates downstream, causing RAG systems to hallucinate or miss critical context entirely. 
@@ -12,7 +12,7 @@ While the pipeline can leverage state-of-the-art models like Qwen3-30B for chunk
 The system dynamically routes simple, medium, and complex documents to the optimal processing path. This ensures that *any* local model plugged into the system operates at peak efficiency, yielding unprecedented cost optimizations while retaining maximum semantic fidelity.
 
 ### Architectural Pipeline
-![Document Preprocessing Engine](../assets/bimextract_premium.png)
+![Document Preprocessing Engine](assets/bimextract_premium.png)
 
 ## Core Capabilities
 - **Agentic Chunking**: Dynamically segments documents based on semantic and structural cues, ensuring context-preserving overlaps and metadata enrichment.
