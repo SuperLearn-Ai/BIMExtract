@@ -1,0 +1,6 @@
+# Cursor/Codex AI Rules for BIMExtract
+
+## Guidelines
+- Focus on efficient memory processing and document parsing libraries (e.g. `docling`, `olmocr`).
+- Antigravity Agents must handle rate limits gracefully using loops and hooks.
+- Write robust, asynchronous ingestion scripts.
