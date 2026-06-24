@@ -14,6 +14,9 @@ The system dynamically routes simple, medium, and complex documents to the optim
 ### Architectural Pipeline
 ![Document Preprocessing Engine](assets/bimextract_premium.png)
 
+### Tech Stack & Orchestration Flow
+![BIMExtract Tech Stack Flow](assets/bimextract_excalidraw.png)
+
 ## Core Capabilities
 - **Agentic Chunking**: Dynamically segments documents based on semantic and structural cues, ensuring context-preserving overlaps and metadata enrichment.
 - **Contextual Enrichment Engine**: Intelligently appends critical document-level context to isolated chunks, effectively eliminating the "lost in the middle" retrieval phenomenon.
