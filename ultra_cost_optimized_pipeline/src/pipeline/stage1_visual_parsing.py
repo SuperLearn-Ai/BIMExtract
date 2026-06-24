@@ -26,11 +26,15 @@ import yaml
 import sys
 import os
 
-# Add the current directory and utils to Python path for imports
+# Add the current directory, parent directory, and utils to Python path for imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
-utils_dir = os.path.join(current_dir, 'utils')
-sys.path.insert(0, current_dir)
-sys.path.insert(0, utils_dir)
+parent_dir = os.path.dirname(current_dir)  # src directory
+utils_dir = os.path.join(parent_dir, 'utils')
+
+# Insert parent directory first to enable absolute imports
+sys.path.insert(0, parent_dir)
+sys.path.insert(1, current_dir)
+sys.path.insert(2, utils_dir)
 
 try:
     from utils.cost_tracking import CostTracker
@@ -38,8 +42,8 @@ try:
 except ImportError:
     # Fallback for relative imports
     try:
-        from .utils.cost_tracking import CostTracker
-        from .utils.quantization import QuantizationManager
+        from utils.cost_tracking import CostTracker
+        from utils.quantization import QuantizationManager
     except ImportError:
         # Create minimal fallback classes if utils can't be imported
         class CostTracker:
@@ -568,7 +572,7 @@ class QuantizedLayoutLM:
         return layout_info
 
 
-class VisualParsingStage:
+class Stage1VisualParser:
     """Main visual parsing stage coordinator with robust error handling"""
     
     def __init__(self, config_path: str = "config/pipeline_config.yaml"):
