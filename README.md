@@ -1,185 +1,38 @@
-# Ultra-Cost-Optimized Academic Document Extraction Pipeline
+# BIMExtract: Intelligent Preprocessing Moat
 
-**Revolutionary Cost Reduction**: Process academic documents at **$0.15 per 1,000 pages** while maintaining 95% accuracy through cutting-edge optimization techniques.
+![Preprocessing Engine](../assets/preprocessing_moat.png)
 
-## 🚀 Key Features
+## The Breakthrough
+Traditional document parsing fails catastrophically when faced with messy layouts, handwritten notes, mathematical formulas, and unstructured noise. This failure propagates downstream, causing RAG systems to hallucinate or miss critical context entirely. 
 
-- **95% Cost Reduction**: From $3.00 to $0.15 per 1,000 pages
-- **95% Accuracy Maintained**: No compromise on quality
-- **Self-Hosted**: Complete control over infrastructure
-- **No Docker Required**: Simplified deployment
-- **Academic Focus**: Optimized for lecture notes, papers, and mathematical content
+**BIMExtract** is our proprietary solution to this problem. It is an intelligent, model-agnostic preprocessing engine that acts as an impenetrable moat against bad data. By routing visual parsing and layout analysis through dynamic agentic flows, it structurally perfects data *before* it ever reaches the retrieval index. 
 
-## 📊 Performance Metrics
+## The Model-Agnostic Stack
+While the pipeline can leverage state-of-the-art models like Qwen3-30B for chunking or PaddleOCR for visual extraction, **the true power lies in our orchestration stack**. 
+The system dynamically routes simple, medium, and complex documents to the optimal processing path. This ensures that *any* local model plugged into the system operates at peak efficiency, yielding unprecedented cost optimizations while retaining maximum semantic fidelity.
 
-| Metric | Value |
-|--------|-------|
-| **Cost per 1K Pages** | $0.15 |
-| **Accuracy** | 95% |
-| **Processing Speed** | 800 pages/hour |
-| **Quality Score** | 9.0/10 |
-| **ROI vs Premium** | 20x better |
+### Architectural Pipeline
+![Document Preprocessing Engine](../assets/bimextract_premium.png)
 
-## 🏗️ Architecture Overview
+## Core Capabilities
+- **Agentic Chunking**: Dynamically segments documents based on semantic and structural cues, ensuring context-preserving overlaps and metadata enrichment.
+- **Contextual Enrichment Engine**: Intelligently appends critical document-level context to isolated chunks, effectively eliminating the "lost in the middle" retrieval phenomenon.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                Ultra-Cost-Optimized Pipeline                │
-├─────────────────────────────────────────────────────────────┤
-│  Stage 1: Quantized Visual & Formula Parsing               │
-│  ├── PaddleOCR v4.2 (4-bit quantized)                      │
-│  ├── Nougat-small (INT8)                                   │
-│  └── LayoutLMv3-quantized                                  │
-├─────────────────────────────────────────────────────────────┤
-│  Stage 2: Local LLM with Aggressive Caching                │
-│  ├── Llama-3.1-8B-Instruct (4-bit quantized)              │
-│  ├── Redis caching layer                                   │
-│  └── CPU-optimized embeddings                              │
-├─────────────────────────────────────────────────────────────┤
-│  Stage 3: Self-Hosted Vector Storage                       │
-│  ├── Milvus vector database                                │
-│  ├── Sparse vectors (90% compression)                      │
-│  └── Hierarchical storage (SSD + HDD)                      │
-├─────────────────────────────────────────────────────────────┤
-│  Stage 4: Batched Multi-Agent Orchestration                │
-│  ├── Queue-based processing                                │
-│  ├── Complexity routing                                    │
-│  └── Gradient checkpointing                                │
-└─────────────────────────────────────────────────────────────┘
-```
+- **Inverse-HyDE**: Pre-computes synthetic user queries for each block, dramatically accelerating test-time performance.
+- **KV-Cache Materialization**: Pre-caches high-frequency nodes to ensure the underlying local models operate with blazing throughput.
 
-## 🛠️ Quick Start
+## System Setup
 
-### 1. Install Dependencies
 ```bash
-cd ultra_cost_optimized_pipeline
-pip install -r requirements.txt
+# 1. Install Core Dependencies
+pip install google-antigravity pdf2image
+
+# 2. Run the Intelligent Preprocessing Orchestrator
+python preprocessing_agent.py
+
+# 3. Unified CLI Execution
+python ultra_cost_optimized_pipeline/run.py --files docs/sample.pdf --mode langchain
 ```
 
-### 2. Initialize Services
-```bash
-# Start Qdrant vector database
-python scripts/start_qdrant.py
-
-# Start Redis cache
-python scripts/start_redis.py
-```
-
-### 3. Run Demo
-```bash
-python demo_ultra_pipeline.py
-```
-
-## 📁 Project Structure
-
-```
-ultra_cost_optimized_pipeline/
-├── README.md
-├── requirements.txt
-├── config/
-│   ├── pipeline_config.yaml
-│   └── model_config.yaml
-├── src/
-│   ├── stage1_visual_parsing.py
-│   ├── stage2_local_llm.py
-│   ├── stage3_vector_storage.py
-│   ├── stage4_orchestration.py
-│   └── utils/
-│       ├── caching.py
-│       ├── quantization.py
-│       └── cost_tracking.py
-├── scripts/
-│   ├── start_qdrant.py
-│   ├── start_redis.py
-│   └── benchmark.py
-├── demos/
-│   ├── demo_ultra_pipeline.py
-│   ├── demo_cost_comparison.py
-│   └── demo_academic_processing.py
-└── docs/
-    ├── cost_optimization_guide.md
-    ├── deployment_guide.md
-    └── performance_tuning.md
-```
-
-## 💰 Cost Breakdown
-
-| Component | Cost per 1K Pages | Optimization Technique |
-|-----------|------------------|----------------------|
-| Visual Parsing | $0.05 | Quantized open-source models |
-| LLM Processing | $0.04 | Local inference + caching |
-| Vector Storage | $0.03 | Self-hosted Qdrant |
-| Orchestration | $0.03 | Batched processing |
-| **Total** | **$0.15** | **95% cost reduction** |
-
-## 📚 Academic Content Support
-
-- ✅ Mathematical formulas and LaTeX
-- ✅ Complex tables and diagrams
-- ✅ Multi-column layouts
-- ✅ Code blocks and syntax highlighting
-- ✅ Graphs and scientific plots
-- ✅ Cross-references and citations
-
-## 🔧 Configuration
-
-The pipeline is highly configurable through YAML files:
-
-- `config/pipeline_config.yaml`: Processing parameters
-- `config/model_config.yaml`: Model specifications and paths
-
-## 📈 Scaling Strategy
-
-- **Batch Processing**: Process 100+ documents simultaneously
-- **Spot Instances**: Use cloud spot instances for 60% additional savings
-- **Complexity Routing**: Route simple docs to lightweight models
-- **Gradient Checkpointing**: Reduce memory usage by 80%
-
-## 🚀 Getting Started
-
-1. **Clone and Setup**
-   ```bash
-   git clone <repository>
-   cd ultra_cost_optimized_pipeline
-   pip install -r requirements.txt
-   ```
-
-2. **Configure Models**
-   ```bash
-   python scripts/download_models.py
-   ```
-
-3. **Run Demo**
-   ```bash
-   python demo_ultra_pipeline.py
-   ```
-
-## 📊 Benchmarks
-
-Processing 1,000 academic pages:
-- **Cost**: $0.15 (vs $3.00 premium)
-- **Time**: 75 minutes (vs 40 minutes premium)
-- **Accuracy**: 95% (maintained)
-- **Quality**: 9.0/10 (vs 9.5/10 premium)
-
-## 🎯 Use Cases
-
-Perfect for:
-- **University Research**: Bulk processing of papers
-- **Educational Institutions**: Budget-conscious operations
-- **Student Projects**: Affordable document analysis
-- **Academic Publishers**: Cost-effective content extraction
-
-## 🔗 Links
-
-- [Cost Optimization Guide](docs/cost_optimization_guide.md)
-- [Deployment Guide](docs/deployment_guide.md)
-- [Performance Tuning](docs/performance_tuning.md)
-
-## 📄 License
-
-MIT License - See LICENSE file for details
-
----
-
-**Result**: A production-ready document extraction pipeline that processes academic documents at **$0.15 per 1,000 pages** while maintaining 95% accuracy, enabling profitable operations from day one. 
+## Supported Architectures
+Our ingestion stack is highly modular. It natively supports execution via local workstations, headless cloud deployments, and orchestrated multi-GPU RunPod scaling out-of-the-box.
